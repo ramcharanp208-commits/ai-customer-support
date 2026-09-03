@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — SupportAI</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="auth-page">
+  <div style="width:100%;max-width:420px">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="auth-logo__icon">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="8" fill="white" fill-opacity=".2"/>
+          <path d="M8 10h16v2H8zM8 15h12v2H8zM8 20h10v2H8z" fill="white"/>
+          <circle cx="24" cy="21" r="5" fill="#10b981"/>
+          <path d="M22 21l1.5 1.5L26 19" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>Welcome back</h1>
+      <p>Sign in to your SupportAI account</p>
+    </div>
+
+    <!-- Card -->
+    <div class="auth-card">
+      <form id="login-form">
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="you@example.com" required autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" />
+            <button type="button" id="toggle-pw" class="toggle-pw" title="Show/hide password">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--full" style="margin-top:8px">
+          Sign in
+        </button>
+
+      </form>
+
+      <p class="text-center text-sm mt-4" style="color:#64748b">
+        Don't have an account?
+        <a href="register.html">Create one</a>
+      </p>
+    </div>
+
+    <!-- Demo hint -->
+    <div class="auth-hint">
+      <strong>Demo:</strong> Register as <em>customer</em>, <em>agent</em>, or <em>admin</em>
+      to explore all features.
+    </div>
+
+  </div>
+</div>
+
+<script src="js/script.js"></script>
+<script>initLogin();</script>
+</body>
+</html>

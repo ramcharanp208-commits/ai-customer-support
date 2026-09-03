@@ -1,122 +1,73 @@
-"""
-Authentication helpers: password hashing, JWT creation/verification,
-and FastAPI dependency functions for protected routes.
-"""
-
 import os
 from datetime import datetime, timedelta
-from typing import Optional
-
-from dotenv import load_dotenv
+from jose import jwt, JWTError
+from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-
 from database import get_db
-from models import User, UserRole
+from models import User
 
-load_dotenv()
+# Secret key for JWT signing — change this in production
+SECRET_KEY = "supersecretkey123"
+ALGORITHM  = "HS256"
+TOKEN_EXPIRE_MINUTES = 60
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
-
-SECRET_KEY = os.getenv("SECRET_KEY", "change-this-in-production")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Tells FastAPI where to find the bearer token (used in Swagger UI too)
+# bcrypt password hashing
+pwd_context   = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-# ---------------------------------------------------------------------------
-# Password utilities
-# ---------------------------------------------------------------------------
-
-def hash_password(plain: str) -> str:
-    return pwd_context.hash(plain)
+# Hash a plain password
+def hash_password(plain_password):
+    return pwd_context.hash(plain_password)
 
 
-def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+# Check plain password against stored hash
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
 
-# ---------------------------------------------------------------------------
-# JWT utilities
-# ---------------------------------------------------------------------------
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+# Create a JWT token
+def create_token(data: dict):
     payload = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire  = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRE_MINUTES)
     payload.update({"exp": expire})
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def decode_token(token: str) -> dict:
+# Get the logged-in user from the token (used as a dependency in routes)
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
     except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-
-# ---------------------------------------------------------------------------
-# FastAPI dependency: current authenticated user
-# ---------------------------------------------------------------------------
-
-def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
-) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    payload = decode_token(token)
-    user_id: Optional[int] = payload.get("sub")
-    if user_id is None:
-        raise credentials_exception
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
     user = db.query(User).filter(User.id == int(user_id)).first()
     if user is None:
-        raise credentials_exception
-
+        raise HTTPException(status_code=401, detail="User not found")
     return user
 
 
-# ---------------------------------------------------------------------------
-# Role-based dependency factories
-# ---------------------------------------------------------------------------
-
-def require_role(*roles: UserRole):
-    """
-    Returns a FastAPI dependency that raises 403 if the current user's role
-    is not in the allowed roles list.
-
-    Usage:
-        @router.get("/admin", dependencies=[Depends(require_role(UserRole.admin))])
-    """
-    def _check(current_user: User = Depends(get_current_user)) -> User:
-        if current_user.role not in roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access restricted. Required role(s): {[r.value for r in roles]}",
-            )
-        return current_user
-
-    return _check
+# Only allow customers (and above)
+def require_customer(current_user: User = Depends(get_current_user)):
+    if current_user.role not in ["customer", "agent", "admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return current_user
 
 
-# Convenient pre-built role dependencies
-require_customer = require_role(UserRole.customer, UserRole.agent, UserRole.admin)
-require_agent = require_role(UserRole.agent, UserRole.admin)
-require_admin = require_role(UserRole.admin)
+# Only allow agents (and admins)
+def require_agent(current_user: User = Depends(get_current_user)):
+    if current_user.role not in ["agent", "admin"]:
+        raise HTTPException(status_code=403, detail="Agents only")
+    return current_user
+
+
+# Only allow admins
+def require_admin(current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admins only")
+    return current_user

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket Detail — SupportAI</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar"></nav>
+
+<main style="padding:32px 0">
+  <div class="container" style="max-width:720px">
+
+    <!-- Back button -->
+    <button class="back-link" onclick="history.back()">← Back</button>
+
+    <!-- Ticket header (injected by JS) -->
+    <div id="ticket-header"></div>
+
+    <!-- Message thread (injected by JS) -->
+    <div id="thread"></div>
+
+    <!-- Reply box (injected by JS for agents/admins) -->
+    <div id="reply-section"></div>
+
+  </div>
+</main>
+
+<script src="js/script.js"></script>
+<script>initTicketDetail();</script>
+</body>
+</html>

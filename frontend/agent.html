@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Dashboard — SupportAI</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar"></nav>
+
+<main style="padding:32px 0">
+  <div class="container">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1>Agent Dashboard</h1>
+        <p>Welcome, <strong id="agent-name"></strong></p>
+      </div>
+      <button class="btn btn--secondary" id="refresh-btn">🔄 Refresh</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="max-width:400px">
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#dbeafe;color:#2563eb">📋</div>
+        <div>
+          <div class="stat-card__value" id="stat-assigned">—</div>
+          <div class="stat-card__label">Assigned to me</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="mine">My Assigned Tickets</button>
+      <button class="tab-btn"        data-tab="all">All Open Tickets</button>
+    </div>
+
+    <!-- Ticket list -->
+    <div id="ticket-list"></div>
+
+  </div>
+</main>
+
+<script src="js/script.js"></script>
+<script>initAgent();</script>
+</body>
+</html>

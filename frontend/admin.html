@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — SupportAI</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar"></nav>
+
+<main style="padding:32px 0">
+  <div class="container--wide">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p>System overview</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn--secondary" onclick="initAdmin()">🔄 Refresh</button>
+        <a href="admin-tickets.html" class="btn btn--primary">🎫 Manage Tickets</a>
+      </div>
+    </div>
+
+    <!-- Stats grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#dbeafe;color:#2563eb">🎫</div>
+        <div><div class="stat-card__value" id="s-total">—</div><div class="stat-card__label">Total Tickets</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#dbeafe;color:#1d4ed8">📂</div>
+        <div><div class="stat-card__value" id="s-open">—</div><div class="stat-card__label">Open</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#fef3c7;color:#d97706">⏳</div>
+        <div><div class="stat-card__value" id="s-pending">—</div><div class="stat-card__label">Pending</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#dcfce7;color:#16a34a">✅</div>
+        <div><div class="stat-card__value" id="s-resolved">—</div><div class="stat-card__label">Resolved</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#f1f5f9;color:#64748b">🔒</div>
+        <div><div class="stat-card__value" id="s-closed">—</div><div class="stat-card__label">Closed</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#ffedd5;color:#c2410c">🔥</div>
+        <div><div class="stat-card__value" id="s-high">—</div><div class="stat-card__label">High Priority</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#fee2e2;color:#dc2626">🚨</div>
+        <div><div class="stat-card__value" id="s-urgent">—</div><div class="stat-card__label">Urgent</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#f3e8ff;color:#7c3aed">👤</div>
+        <div><div class="stat-card__value" id="s-unassigned">—</div><div class="stat-card__label">Unassigned</div></div>
+      </div>
+    </div>
+
+    <!-- Quick action card -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:8px">
+      <a href="admin-tickets.html" class="card card--hover" style="text-decoration:none">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="stat-card__icon" style="background:#dbeafe;color:#2563eb">🎫</div>
+          <div>
+            <div style="font-weight:700">Manage All Tickets</div>
+            <div style="font-size:.8rem;color:#64748b">Filter, assign, update status, delete</div>
+          </div>
+        </div>
+      </a>
+      <div class="card" style="background:linear-gradient(135deg,#f0fdf4,#fff);border-color:#bbf7d0">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="stat-card__icon" style="background:#dcfce7;color:#16a34a">🤖</div>
+          <div>
+            <div style="font-weight:700">AI-Powered Triage</div>
+            <div style="font-size:.8rem;color:#64748b">All tickets auto-classified by GPT-4o-mini</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="js/script.js"></script>
+<script>initAdmin();</script>
+</body>
+</html>

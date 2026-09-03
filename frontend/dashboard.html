@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Tickets — SupportAI</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar"></nav>
+
+<main style="padding:32px 0">
+  <div class="container">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1>My Support Tickets</h1>
+        <p>Welcome back, <strong id="user-name"></strong></p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn--secondary" onclick="initDashboard()">🔄 Refresh</button>
+        <a href="new-ticket.html" class="btn btn--primary">➕ New Ticket</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#dbeafe;color:#2563eb">🎫</div>
+        <div>
+          <div class="stat-card__value" id="stat-total">—</div>
+          <div class="stat-card__label">Total</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#dbeafe;color:#1d4ed8">📂</div>
+        <div>
+          <div class="stat-card__value" id="stat-open">—</div>
+          <div class="stat-card__label">Open</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#fef3c7;color:#d97706">⏳</div>
+        <div>
+          <div class="stat-card__value" id="stat-pending">—</div>
+          <div class="stat-card__label">Pending</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon" style="background:#dcfce7;color:#16a34a">✅</div>
+        <div>
+          <div class="stat-card__value" id="stat-resolved">—</div>
+          <div class="stat-card__label">Resolved</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticket list -->
+    <div id="ticket-list"></div>
+
+  </div>
+</main>
+
+<script src="js/script.js"></script>
+<script>initDashboard();</script>
+</body>
+</html>
