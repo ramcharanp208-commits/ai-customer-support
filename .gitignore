@@ -33,6 +33,7 @@ node_modules/
 frontend/dist/
 frontend/build/
 .npm/
+frontend/package-lock.json
 
 # ── OS files ───────────────────────────────────────────────────────────────────
 .DS_Store
