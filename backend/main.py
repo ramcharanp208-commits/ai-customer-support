@@ -5,6 +5,9 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from database import engine, Base, get_db
 from models import User, Ticket, Message
@@ -25,15 +28,18 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="AI Customer Support System", version="1.0.0")
 
 # Allow frontend to talk to backend
+# Reads allowed origins from .env — covers Live Server (5500) and Vite (5173)
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# OpenAI client
+# OpenAI client — reads key from .env
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
 
 

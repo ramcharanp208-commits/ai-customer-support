@@ -3,7 +3,9 @@
    All API calls, auth handling, and UI helpers live here.
    ============================================================ */
 
-const API = "http://127.0.0.1:8000";
+// Backend URL — must match where uvicorn is running
+// Live Server opens files on port 5500, backend runs on port 8000
+const API = "http://localhost:8000";
 
 /* ─────────────────────────────────────────────────────────────
    TOKEN / USER  (localStorage)

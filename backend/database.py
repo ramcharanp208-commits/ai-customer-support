@@ -1,17 +1,25 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from dotenv import load_dotenv
 
-# SQLite database file will be created in the backend folder
-DATABASE_URL = "sqlite:///./support.db"
+load_dotenv()
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# Read database URL from .env file
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# PostgreSQL needs no extra args; SQLite needs check_same_thread=False
+if DATABASE_URL and DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
 
-# Dependency - used in every route to get a DB session
+# Dependency — used in every route to get a DB session
 def get_db():
     db = SessionLocal()
     try:
