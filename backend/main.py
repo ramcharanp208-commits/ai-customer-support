@@ -213,7 +213,7 @@ def ai_suggest_reply(ticket_title, ticket_description, messages):
 # ROUTES
 # ─────────────────────────────────────────────
 
-@app.get("/")
+@app.get("/api")
 def root():
     return {"message": "AI Customer Support API is running", "docs": "/docs"}
 
