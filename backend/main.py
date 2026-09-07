@@ -9,7 +9,6 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 from database import engine, Base, get_db
@@ -31,7 +30,6 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="AI Customer Support System", version="1.0.0")
 
 # Allow frontend to talk to backend
-# Reads allowed origins from .env — covers Live Server (5500) and Vite (5173)
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500").split(",")
 
 app.add_middleware(
@@ -42,53 +40,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# OpenAI client — reads key from .env
+# OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
 
 # Base Directories setup
-BASE_DIR=os.path.dirname(os.path.abspath(__file__))
-FRONTEND_DIR=os.path.join(BASE_DIR,"..", "frontend")
-# Link css and Js file
-app.mount("/css",StaticFiles(directory=os.path.join(FRONTEND_DIR,"css")),name="css")
-app.mount("/js",StaticFiles(directory=os.path.join(FRONTEND_DIR,"js")),name="js")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")
 
-@app.get("/")
+# Mount CSS & JS static directories
+if os.path.exists(os.path.join(FRONTEND_DIR, "css")):
+    app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name="css")
+if os.path.exists(os.path.join(FRONTEND_DIR, "js")):
+    app.mount("/js", StaticFiles(directory=os.path.join(FRONTEND_DIR, "js")), name="js")
+
+# ─────────────────────────────────────────────
+# FRONTEND HTML ROUTES (MUST BE BEFORE API ROUTES)
+# ─────────────────────────────────────────────
+
+@app.get("/", response_class=FileResponse)
 def serve_root():
-    return FileResponse(os.path.join(FRONTEND_DIR,"index.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 
-@app.get("/login")
+@app.get("/login", response_class=FileResponse)
 def serve_login():
-    return FileResponse(os.path.join(FRONTEND_DIR,"login.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "login.html"))
 
-@app.get("/register")
+@app.get("/register", response_class=FileResponse)
 def serve_register():
-    return FileResponse(os.path.join(FRONTEND_DIR,"register.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "register.html"))
 
-@app.get("/dashboard")
+@app.get("/dashboard", response_class=FileResponse)
 def serve_dashboard():
-    return FileResponse(os.path.join(FRONTEND_DIR,"dashboard.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "dashboard.html"))
 
-@app.get("/admin")
+@app.get("/admin", response_class=FileResponse)
 def serve_admin():
-    return FileResponse(os.path.join(FRONTEND_DIR,"admin.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "admin.html"))
 
-@app.get("/admin-tickets")
+@app.get("/admin-tickets", response_class=FileResponse)
 def serve_admin_tickets():
-    return FileResponse(os.path.join(FRONTEND_DIR,"admin-tickets.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "admin-tickets.html"))
 
-@app.get("/agent")
+@app.get("/agent", response_class=FileResponse)
 def serve_agent():
-    return FileResponse(os.path.join(FRONTEND_DIR,"agent.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "agent.html"))
 
-
-@app.get("/ticket")
+@app.get("/ticket", response_class=FileResponse)
 def serve_ticket():
-    return FileResponse(os.path.join(FRONTEND_DIR,"ticket.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "ticket.html"))
 
-@app.get("/new-ticket")
+@app.get("/new-ticket", response_class=FileResponse)
 def serve_new_ticket():
-    return FileResponse(os.path.join(FRONTEND_DIR,"new-ticket.html"))
-
+    return FileResponse(os.path.join(FRONTEND_DIR, "new-ticket.html"))
 
 
 # ─────────────────────────────────────────────
@@ -96,7 +99,6 @@ def serve_new_ticket():
 # ─────────────────────────────────────────────
 
 def analyze_with_ai(title, description):
-    """Send ticket to OpenAI and get category, priority, sentiment, summary, reply."""
     api_key = os.getenv("OPENAI_API_KEY", "")
     if not api_key or api_key == "your-openai-api-key-here":
         return rule_based_analysis(description)
@@ -136,7 +138,6 @@ def analyze_with_ai(title, description):
 
 
 def rule_based_analysis(description):
-    """Fallback when OpenAI is not available."""
     text = description.lower()
 
     if any(w in text for w in ["payment", "pay", "charged", "refund", "invoice"]):
@@ -181,7 +182,6 @@ def rule_based_analysis(description):
 
 
 def ai_suggest_reply(ticket_title, ticket_description, messages):
-    """Generate a reply suggestion for an agent."""
     api_key = os.getenv("OPENAI_API_KEY", "")
     if not api_key or api_key == "your-openai-api-key-here":
         return "Thank you for your patience. We are actively working on your issue and will update you shortly."
@@ -210,29 +210,24 @@ def ai_suggest_reply(ticket_title, ticket_description, messages):
 
 
 # ─────────────────────────────────────────────
-# ROUTES
+# API ROUTES
 # ─────────────────────────────────────────────
 
 @app.get("/api")
 def root():
     return {"message": "AI Customer Support API is running", "docs": "/docs"}
 
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-
-# ── Auth routes ───────────────────────────────
-
+# Auth routes
 @app.post("/auth/register", response_model=UserOut, status_code=201)
 def register(data: UserRegister, db: Session = Depends(get_db)):
-    # Check email not already used
     existing = db.query(User).filter(User.email == data.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Validate role
     if data.role not in ["customer", "agent", "admin"]:
         raise HTTPException(status_code=400, detail="Role must be customer, agent, or admin")
 
@@ -273,8 +268,7 @@ def me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-# ── AI routes ─────────────────────────────────
-
+# AI routes
 @app.post("/ai/analyze")
 def ai_analyze(data: AIAnalyzeRequest, current_user: User = Depends(get_current_user)):
     result = analyze_with_ai("Support Request", data.description)
@@ -293,11 +287,9 @@ def suggest_reply(ticket_id: int, db: Session = Depends(get_db), current_user: U
     return {"ticket_id": ticket_id, "suggested_reply": reply}
 
 
-# ── Ticket routes (Customer) ──────────────────
-
+# Ticket routes (Customer)
 @app.post("/tickets/", response_model=TicketDetailOut, status_code=201)
 def create_ticket(data: TicketCreate, db: Session = Depends(get_db), current_user: User = Depends(require_customer)):
-    # AI analysis happens automatically on ticket creation
     analysis = analyze_with_ai(data.title, data.description)
 
     ticket = Ticket(
@@ -313,7 +305,6 @@ def create_ticket(data: TicketCreate, db: Session = Depends(get_db), current_use
     db.commit()
     db.refresh(ticket)
 
-    # Save AI reply as first message in thread
     ai_msg = Message(
         message     = analysis["suggested_reply"],
         sender_type = "ai",
@@ -323,7 +314,6 @@ def create_ticket(data: TicketCreate, db: Session = Depends(get_db), current_use
     db.add(ai_msg)
     db.commit()
 
-    # Build response manually (since no ORM relationships)
     messages = db.query(Message).filter(Message.ticket_id == ticket.id).all()
     result   = TicketDetailOut.model_validate(ticket)
     result.messages   = messages
@@ -343,7 +333,6 @@ def get_ticket(ticket_id: int, db: Session = Depends(get_db), current_user: User
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    # Customers can only see their own tickets
     if current_user.role == "customer" and ticket.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
 
@@ -358,8 +347,7 @@ def get_ticket(ticket_id: int, db: Session = Depends(get_db), current_user: User
     return result
 
 
-# ── Message routes (Agent) ────────────────────
-
+# Message routes (Agent)
 @app.post("/tickets/{ticket_id}/messages", response_model=MessageOut)
 def post_message(ticket_id: int, data: MessageCreate, db: Session = Depends(get_db), current_user: User = Depends(require_agent)):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
@@ -374,7 +362,6 @@ def post_message(ticket_id: int, data: MessageCreate, db: Session = Depends(get_
     )
     db.add(msg)
 
-    # Optionally change ticket status in the same request
     if data.status_change:
         ticket.status = data.status_change
 
@@ -385,20 +372,17 @@ def post_message(ticket_id: int, data: MessageCreate, db: Session = Depends(get_
 
 @app.get("/agent/tickets")
 def agent_tickets(db: Session = Depends(get_db), current_user: User = Depends(require_agent)):
-    """Tickets assigned to this agent."""
     tickets = db.query(Ticket).filter(Ticket.assigned_to == current_user.id).order_by(Ticket.created_at.desc()).all()
     return tickets
 
 
 @app.get("/agent/all-tickets")
 def agent_all_tickets(db: Session = Depends(get_db), current_user: User = Depends(require_agent)):
-    """All open and pending tickets visible to agents."""
     tickets = db.query(Ticket).filter(Ticket.status.in_(["open", "pending"])).order_by(Ticket.created_at.desc()).all()
     return tickets
 
 
-# ── Admin routes ──────────────────────────────
-
+# Admin routes
 @app.get("/admin/dashboard")
 def admin_dashboard(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     return {
@@ -454,7 +438,7 @@ def assign_ticket(ticket_id: int, data: TicketAssign, db: Session = Depends(get_
 
     ticket.assigned_to = data.agent_id
     if ticket.status == "open":
-        ticket.status = "pending"   # auto move to pending on assign
+        ticket.status = "pending"
     db.commit()
     db.refresh(ticket)
     return ticket
@@ -476,7 +460,6 @@ def delete_ticket(ticket_id: int, db: Session = Depends(get_db), current_user: U
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
-    # Delete messages first
     db.query(Message).filter(Message.ticket_id == ticket_id).delete()
     db.delete(ticket)
     db.commit()
