@@ -5,7 +5,9 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from openai import OpenAI
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -41,6 +43,45 @@ app.add_middleware(
 
 # OpenAI client — reads key from .env
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
+
+BASE_DIR=os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR=os.path.join(BASE_DIR,"..", "frontend")
+@app.get("/login")
+def serve_login():
+    return FileResponse(os.path.join(FRONTEND_DIR,"login.html"))
+
+@app.get("/register")
+def serve_register():
+    return FileResponse(os.path.join(FRONTEND_DIR,"register.html"))
+
+@app.get("/dashboard")
+def serve_dashboard():
+    return FileResponse(os.path.join(FRONTEND_DIR,"dashboard.html"))
+
+@app.get("/admin")
+def serve_admin():
+    return FileResponse(os.path.join(FRONTEND_DIR,"admin.html"))
+
+@app.get("/admin-tickets")
+def serve_admin_tickets():
+    return FileResponse(os.path.join(FRONTEND_DIR,"admin-tickets.html"))
+
+@app.get("/agent")
+def serve_agent():
+    return FileResponse(os.path.join(FRONTEND_DIR,"agent.html"))
+
+@app.get("/index")
+def serve_index():
+    return FileResponse(os.path.join(FRONTEND_DIR,"index.html"))
+
+@app.get("/ticket")
+def serve_ticket():
+    return FileResponse(os.path.join(FRONTEND_DIR,"ticket.html"))
+
+@app.get("/new-ticket")
+def serve_new_ticket():
+    return FileResponse(os.path.join(FRONTEND_DIR,"new-ticket.html"))
+
 
 
 # ─────────────────────────────────────────────
