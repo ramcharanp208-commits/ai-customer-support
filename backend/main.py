@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from openai import OpenAI
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 
@@ -44,8 +45,17 @@ app.add_middleware(
 # OpenAI client — reads key from .env
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
 
+# Base Directories setup
 BASE_DIR=os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR=os.path.join(BASE_DIR,"..", "frontend")
+# Link css and Js file
+app.mount("/css",StaticFiles(directory=os.path.join(FRONTEND_DIR,"css")),name="css")
+app.mount("/js",StaticFiles(directory=os.path.join(FRONTEND_DIR,"js")),name="js")
+
+@app.get("/")
+def serve_root():
+    return FileResponse(os.path.join(FRONTEND_DIR,"index.html"))
+
 @app.get("/login")
 def serve_login():
     return FileResponse(os.path.join(FRONTEND_DIR,"login.html"))
@@ -70,9 +80,6 @@ def serve_admin_tickets():
 def serve_agent():
     return FileResponse(os.path.join(FRONTEND_DIR,"agent.html"))
 
-@app.get("/index")
-def serve_index():
-    return FileResponse(os.path.join(FRONTEND_DIR,"index.html"))
 
 @app.get("/ticket")
 def serve_ticket():
