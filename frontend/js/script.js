@@ -5,7 +5,7 @@
 
 // Backend URL — must match where uvicorn is running
 // Live Server opens files on port 5500, backend runs on port 8000
-const API = "http://localhost:8000";
+const API = "https://ai-customer-support-g9a1.onrender.com";
 
 /* ─────────────────────────────────────────────────────────────
    TOKEN / USER  (localStorage)
