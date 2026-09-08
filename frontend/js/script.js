@@ -670,7 +670,11 @@ async function initAdminTickets() {
     const priority = document.getElementById("f-priority").value;
     const category = document.getElementById("f-category").value;
 
-    let url = `/admin/tickets?page=${page}&page_size=${PAGE_SIZE}`;
+    const currentUser = getUser();
+    let url = (currentUser && (currentUser.role === "admin" || currentUser.is_admin)) 
+    ? `/admin/tickets?page=${page}&page_size=${PAGE_SIZE}`
+    : `/tickets?page=${page}&page_size=${PAGE_SIZE}`;
+
     if (status)   url += `&status=${status}`;
     if (priority) url += `&priority=${priority}`;
     if (category) url += `&category=${category}`;
