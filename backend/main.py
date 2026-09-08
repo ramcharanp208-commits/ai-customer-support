@@ -43,12 +43,26 @@ app.add_middleware(
 # OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
 
-# Current file location to find Base Directories setup
+# BASE_DIR setup
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
-# Mount static files for (css,js,image)
-app.mount("/static",StaticFiles(directory=FRONTEND_DIR),name="static")
+# Sabhi static HTML, CSS, JS files ko root par mount karein
+app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name="css")
+app.mount("/js", StaticFiles(directory=os.path.join(FRONTEND_DIR, "js")), name="js")
+
+# Har HTML file (jaise login.html, index.html) ko serve karne ke liye catch-all route
+@app.get("/{file_name:path}")
+async def serve_frontend(file_name: str):
+    if file_name == "":
+        file_name = "index.html"
+    
+    file_path = os.path.join(FRONTEND_DIR, file_name)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    
+    # Fallback to index.html if file not found
+    return FileResponse(os.path.join(FRONTEND_DIR,"index.html"))
 # ─────────────────────────────────────────────
 # FRONTEND HTML ROUTES (MUST BE BEFORE API ROUTES)
 # ─────────────────────────────────────────────
